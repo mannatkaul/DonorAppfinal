@@ -3,6 +3,7 @@ dist/
 build/
 .cache/
 .env*
+!.env.example
 .vite/
 vite.config.*.timestamp-*
 *.tsbuildinfo
@@ -19,3 +20,9 @@ logs/
 # beside it.
 /.plugins/
 /.opencode-skills/
+
+# Python backend
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/

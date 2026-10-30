@@ -1,6 +1,6 @@
-# Asha Foundation Donor Portal
+# Hope Foundation Donor Portal
 
-A donor-only frontend prototype built with React, TypeScript, Vite, React Router, Tailwind CSS, React Hook Form, Zod, Recharts, date-fns, and Lucide icons.
+The original donor portal UI is preserved. Registration and login use the FastAPI donor API. The donation wizard is restored to the original prototype simulation; it does not initiate a real payment or write donations to the backend. The remaining legacy dashboard and donor-management screens are not fully API-connected.
 
 ## Development
 
@@ -12,14 +12,12 @@ npm run build
 
 In Figma Make, the development server is started and supervised automatically.
 
-## Demo mode
+## Frontend configuration
 
-- Sign in with the prefilled demo email and password.
-- Authentication, registration, password reset, contact submission, and payment processing are simulated.
-- No real transaction, email, tax certificate, or support inquiry is created.
-- Demo profile preferences and mock donations use browser storage. Payment credentials, real passwords, and secrets are never stored.
-- Downloaded receipts are plainly marked as demonstrations and are not tax certificates.
+The frontend uses `VITE_API_BASE_URL` to select the backend API and defaults to `http://localhost:8000`. Put the variable in the Vite environment before starting the dev server if your API runs elsewhere. Authentication tokens are kept for the current browser session. Razorpay checkout is not connected to the frontend; donations use the original clearly labelled prototype simulation.
 
-## Production requirements
+The existing UI is supplied as compiled assets, so a small Vite plugin applies targeted, checked transformations to the original bundles at development and build time. It does not replace or redesign the portal.
 
-A production release requires secure server-side authentication, donor-scoped authorization, a PCI-compliant payment provider, recurring payment mandates, transactional email, a receipt/tax compliance service, protected APIs, database persistence, audit logging, privacy and retention controls, rate limiting, monitoring, and approved legal content.
+## Backend
+
+The PostgreSQL-backed FastAPI service, setup and pgAdmin instructions, environment configuration, migrations, administrator bootstrap, API documentation, and tests are described in [`backend/README.md`](./backend/README.md).

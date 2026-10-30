@@ -1,7 +1,9 @@
 import { defineConfig, type HtmlTagDescriptor, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { patchLegacyBundle } from './src/legacyBundlePatches.ts'
 
 import siteConfiguration from './.figma/make/site.json'
 
@@ -50,15 +52,69 @@ react(),
 })
 
 function restoreBuiltAppAssets(): Plugin {
+  const bundleNames = [
+    'index-D2QvHT6c.js',
+    'corePages-zCQb0dvO.js',
+    'donationPages-B8hpj8RV.js',
+  ] as const
+
   return {
     name: 'restore-built-app-assets',
     configureServer(server) {
       server.middlewares.use((req, _res, next) => {
-        if (req.url?.startsWith('/assets/')) {
-          req.url = `/dist${req.url}`
+        const requestPath = req.url?.split('?')[0] ?? ''
+        const assetsPrefix = '/assets/'
+        if (!requestPath.startsWith(assetsPrefix)) return next()
+
+        const assetsDirectory = path.resolve(__dirname, 'dist', 'assets')
+        const relativePath = decodeURIComponent(requestPath.slice(assetsPrefix.length))
+        const assetPath = path.resolve(assetsDirectory, relativePath)
+        if (!assetPath.startsWith(`${assetsDirectory}${path.sep}`)) {
+          _res.statusCode = 400
+          _res.end('Invalid asset path.')
+          return
         }
-        next()
+        if (!existsSync(assetPath)) return next()
+
+        const bundleName = bundleNames.find((name) => name === path.basename(assetPath))
+        const contentTypes: Record<string, string> = {
+          '.css': 'text/css; charset=utf-8',
+          '.gif': 'image/gif',
+          '.ico': 'image/x-icon',
+          '.jpeg': 'image/jpeg',
+          '.jpg': 'image/jpeg',
+          '.js': 'text/javascript; charset=utf-8',
+          '.json': 'application/json; charset=utf-8',
+          '.png': 'image/png',
+          '.svg': 'image/svg+xml',
+          '.webp': 'image/webp',
+          '.woff': 'font/woff',
+          '.woff2': 'font/woff2',
+        }
+        const source = readFileSync(assetPath)
+        const response =
+          bundleName === undefined
+            ? source
+            : Buffer.from(patchLegacyBundle(bundleName, source.toString('utf8')))
+
+        _res.setHeader(
+          'Content-Type',
+          contentTypes[path.extname(assetPath).toLowerCase()] ?? 'application/octet-stream',
+        )
+        _res.setHeader('Cache-Control', 'no-cache')
+        _res.end(response)
       })
+    },
+    writeBundle(outputOptions) {
+      const outputDirectory = outputOptions.dir ?? path.resolve(__dirname, 'dist')
+      for (const bundleName of bundleNames) {
+        const bundlePath = path.resolve(outputDirectory, 'assets', bundleName)
+        if (!existsSync(bundlePath)) {
+          throw new Error(`The restored portal bundle is missing: ${bundlePath}`)
+        }
+        const source = readFileSync(bundlePath, 'utf8')
+        writeFileSync(bundlePath, patchLegacyBundle(bundleName, source))
+      }
     },
   }
 }

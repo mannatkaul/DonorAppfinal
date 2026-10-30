@@ -1,8 +1,16 @@
 import "./index.css";
 
-const assetRoot = import.meta.env.DEV
-  ? `${import.meta.env.BASE_URL}dist/assets/`
-  : `${import.meta.env.BASE_URL}assets/`;
+declare global {
+  interface Window {
+    __DONOR_API_BASE_URL__?: string;
+  }
+}
+
+window.__DONOR_API_BASE_URL__ = (
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+).replace(/\/$/, "");
+
+const assetRoot = `${import.meta.env.BASE_URL}assets/`;
 
 const stylesheet = document.createElement("link");
 stylesheet.rel = "stylesheet";
