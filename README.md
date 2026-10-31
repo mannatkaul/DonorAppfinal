@@ -14,7 +14,7 @@ In Figma Make, the development server is started and supervised automatically.
 
 ## Frontend configuration
 
-The frontend uses `VITE_API_BASE_URL` to select the backend API and defaults to `http://localhost:8000`. Put the variable in the Vite environment before starting the dev server if your API runs elsewhere. Authentication tokens are kept for the current browser session. Razorpay checkout is not connected to the frontend; donations use the original clearly labelled prototype simulation.
+The frontend uses `VITE_API_BASE_URL` to select the backend API and defaults to `http://localhost:8001`. Put the variable in the Vite environment before starting the dev server if your API runs elsewhere. Authentication tokens are kept for the current browser session. Razorpay checkout is not connected to the frontend; donations use the original clearly labelled prototype simulation.
 
 The existing UI is supplied as compiled assets, so a small Vite plugin applies targeted, checked transformations to the original bundles at development and build time. It does not replace or redesign the portal.
 

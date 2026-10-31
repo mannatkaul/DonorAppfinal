@@ -1,0 +1,35 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Start Donor Portal Frontend",
+			"type": "shell",
+			"command": "npm",
+			"args": [
+				"run",
+				"dev",
+				"--",
+				"--host",
+				"0.0.0.0",
+				"--port",
+				"8443"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		},
+		{
+			"label": "Run Donor Frontend with Node",
+			"type": "shell",
+			"command": "C:\\Program Files\\nodejs\\node.exe",
+			"args": [
+				"node_modules\\vite\\bin\\vite.js",
+				"--host",
+				"0.0.0.0",
+				"--port",
+				"8443"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}

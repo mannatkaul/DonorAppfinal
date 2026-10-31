@@ -106,13 +106,37 @@ function patchDonorLogin(source: string): string {
   const demoLogin =
     'ha={async login(e,t){return await pa(),!e||t.length<6?{success:!1,error:`Enter a valid email and a password of at least 6 characters.`}:(sessionStorage.setItem(`asha-demo-auth`,`true`),{success:!0,data:B})},logout(){sessionStorage.removeItem(`asha-demo-auth`)},isAuthenticated(){return sessionStorage.getItem(`asha-demo-auth`)===`true`}}'
   const apiLogin =
-    'ha={async login(e,t){try{let n=await fetch((window.__DONOR_API_BASE_URL__||"http://localhost:8000")+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:e,password:t})}),r=await n.json();if(!n.ok)return{success:!1,error:r.detail||"Invalid email or password."};let i={...B,id:r.donor.id,fullName:r.donor.full_name,displayName:r.donor.full_name,email:r.donor.email,phone:r.donor.phone||"",address:r.donor.address||""};sessionStorage.setItem("asha-donor-token",r.access_token);sessionStorage.setItem("asha-donor-profile",JSON.stringify(i));return{success:!0,data:i}}catch{return{success:!1,error:"Unable to reach the donor service. Please try again."}}},logout(){sessionStorage.removeItem("asha-donor-token"),sessionStorage.removeItem("asha-donor-profile")},isAuthenticated(){return Boolean(sessionStorage.getItem("asha-donor-token"))}}'
+    'ha={async login(e,t){try{let n=await fetch((window.__DONOR_API_BASE_URL__||"http://localhost:8001")+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:e,password:t})}),r=await n.json();if(!n.ok)return{success:!1,error:r.detail||"Invalid email or password."};let i={...B,id:r.donor.id,fullName:r.donor.full_name,displayName:r.donor.full_name,email:r.donor.email,phone:r.donor.phone||"",address:r.donor.address||""};sessionStorage.setItem("asha-donor-token",r.access_token);sessionStorage.setItem("asha-donor-profile",JSON.stringify(i));return{success:!0,data:i}}catch{return{success:!1,error:"Unable to reach the donor service. Please try again."}}},logout(){sessionStorage.removeItem("asha-donor-token"),sessionStorage.removeItem("asha-donor-profile")},isAuthenticated(){return Boolean(sessionStorage.getItem("asha-donor-token"))}}'
   const previousApiLogin = apiLogin.replace(
     'fullName:r.donor.full_name,displayName:r.donor.full_name,',
     'fullName:r.donor.full_name,',
   )
+  const apiLoginAtPreviousPort = apiLogin.replace(
+    'http://localhost:8001',
+    'http://localhost:8000',
+  )
+  const previousApiLoginAtPreviousPort = previousApiLogin.replace(
+    'http://localhost:8001',
+    'http://localhost:8000',
+  )
 
   if (source.includes(apiLogin)) return source
+  if (source.includes(apiLoginAtPreviousPort)) {
+    return replaceOnce(
+      source,
+      apiLoginAtPreviousPort,
+      apiLogin,
+      'index-D2QvHT6c.js',
+    )
+  }
+  if (source.includes(previousApiLoginAtPreviousPort)) {
+    return replaceOnce(
+      source,
+      previousApiLoginAtPreviousPort,
+      apiLogin,
+      'index-D2QvHT6c.js',
+    )
+  }
   if (source.includes(previousApiLogin)) {
     return replaceOnce(
       source,
@@ -201,12 +225,19 @@ export function patchLegacyBundle(name: BundleName, input: string): string {
       'function Zu(){let[e,n]=(0,D.useState)(!1),[registrationError,setRegistrationError]=(0,D.useState)(``),{register:r,handleSubmit:i,formState:{errors:a,isSubmitting:o}}=jt({resolver:Vt(Xu)})',
       name,
     )
-    source = replaceOnce(
-      source,
-      'onSubmit:i(async()=>{await new Promise(e=>setTimeout(e,500)),n(!0)})',
-      'onSubmit:i(async e=>{try{let r=await fetch((window.__DONOR_API_BASE_URL__||"http://localhost:8000")+"/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({full_name:e.fullName,email:e.email,password:e.password,phone:e.phone})}),t=await r.json();if(!r.ok)throw Error(t.detail||"Account creation failed.");n(!0)}catch(e){setRegistrationError(e instanceof Error?e.message:"Account creation failed.")}})',
-      name,
+    const simulatedRegistration =
+      'onSubmit:i(async()=>{await new Promise(e=>setTimeout(e,500)),n(!0)})'
+    const apiRegistration =
+      'onSubmit:i(async e=>{try{let r=await fetch((window.__DONOR_API_BASE_URL__||"http://localhost:8001")+"/api/auth/register",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({full_name:e.fullName,email:e.email,password:e.password,phone:e.phone})}),t=await r.json();if(!r.ok)throw Error(t.detail||"Account creation failed.");n(!0)}catch(e){setRegistrationError(e instanceof Error?e.message:"Account creation failed.")}})'
+    const apiRegistrationAtPreviousPort = apiRegistration.replace(
+      'http://localhost:8001',
+      'http://localhost:8000',
     )
+    if (source.includes(apiRegistrationAtPreviousPort)) {
+      source = replaceOnce(source, apiRegistrationAtPreviousPort, apiRegistration, name)
+    } else {
+      source = replaceOnce(source, simulatedRegistration, apiRegistration, name)
+    }
     source = replaceOnce(
       source,
       'a.terms&&(0,$.jsx)(`span`,{className:`error-text full`,children:a.terms.message}),(0,$.jsx)(`div`,{className:`full`',

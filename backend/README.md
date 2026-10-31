@@ -32,7 +32,7 @@ py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r backend\requirements.txt
 alembic -c backend\alembic.ini upgrade head
-python -m uvicorn app.main:app --app-dir backend --reload --host 127.0.0.1 --port 8000
+python -m uvicorn app.main:app --app-dir backend --reload --host 127.0.0.1 --port 8001
 ```
 
 Create the first administrator in another terminal. From the repository root:
@@ -45,7 +45,7 @@ Pop-Location
 
 The command prompts for a password and stores only its Argon2 password hash. Administrator privileges are not assignable through donor registration or the public donor API.
 
-Open `http://127.0.0.1:8000/docs` for the interactive API documentation and `http://127.0.0.1:8000/api/health` for the service health check. Apply future migrations with `alembic -c backend\alembic.ini upgrade head`.
+Open `http://127.0.0.1:8001/docs` for the interactive API documentation and `http://127.0.0.1:8001/api/health` for the service health check. Apply future migrations with `alembic -c backend\alembic.ini upgrade head`.
 
 ## 3. Check records in pgAdmin
 
@@ -86,4 +86,4 @@ Tests use an isolated in-memory SQLite database and stub provider responses; the
 
 The original compiled portal UI is preserved. Its registration and login forms use the API. The frontend donation wizard has been restored to the original prototype simulation and does not create backend donations or initiate a real payment. The backend Razorpay endpoints remain separate and require valid test credentials; no simulated frontend donation should be treated as a database record or a real receipt.
 
-The other legacy dashboard, donor-management, material-donation, and history screens are not fully connected to these API endpoints. Do not treat their existing display data as database-backed. Set `VITE_API_BASE_URL` in the frontend environment if the API is not at `http://localhost:8000`, and add the frontend's exact origin to `FRONTEND_ORIGINS` before starting the API.
+The other legacy dashboard, donor-management, material-donation, and history screens are not fully connected to these API endpoints. Do not treat their existing display data as database-backed. The frontend defaults to `http://localhost:8001`; set `VITE_API_BASE_URL` in the frontend environment if the API runs elsewhere, and add the frontend's exact origin to `FRONTEND_ORIGINS` before starting the API.

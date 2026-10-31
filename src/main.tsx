@@ -7,7 +7,7 @@ declare global {
 }
 
 window.__DONOR_API_BASE_URL__ = (
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+  import.meta.env.VITE_API_BASE_URL || "http://localhost:8001"
 ).replace(/\/$/, "");
 
 const assetRoot = `${import.meta.env.BASE_URL}assets/`;
